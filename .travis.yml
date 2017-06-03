@@ -1,0 +1,42 @@
+language: php
+php:
+- 5.4
+
+dist: trusty
+sudo: false
+
+install:
+- travis_retry composer self-update
+- travis_retry composer install --no-interaction --prefer-source --dev
+
+addons:
+  sonarqube:
+    organization: "testingucu2017-github"
+    token:
+      secure: "3a62d805f9521d93899e87be247d253c1fcb3107"
+
+script:
+- jdk_switcher use oraclejdk8
+- find admin catalog tests -name *.php | xargs -n 1 -P4 php -l
+- phpunit -c tests/phpunit/phpunit.xml
+- sonar-scanner
+- php vendor/codeception/codeception/codecept run api
+- mvn -f tests/ui-functional/pom.xml test
+
+# Las credenciales fueron agregadas directamente en Travis CI -> Settings
+deploy:
+  provider: azure_web_apps
+
+notifications:
+  slack:
+    on_success: always
+  email:
+    recipients:
+      - TestingUcu2017@gmail.com      
+    on_success: never  # default: change
+    on_failure: always # default: always
+
+
+
+
+
